@@ -4,9 +4,9 @@
 // === CORS ===
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = [
-    'http://localhost:4000/projetos/testingDB',
-    'https://andresantosdev.vercel.app/projetos/testingDB',
-    'http://localhost:5173/projetos/testingDB'  // Vite padrão
+    'http://localhost:4000/',
+    'https://andresantosdev.vercel.app',
+    'http://localhost:5173'  // Vite padrão
 ];
 
 if (in_array($origin, $allowed)) {
