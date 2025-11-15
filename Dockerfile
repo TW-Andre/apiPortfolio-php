@@ -1,9 +1,12 @@
 FROM php:8.2-cli
 
-# Instala a extensão PostgreSQL
-RUN docker-php-ext-install pdo_pgsql
+# Instala dependências do sistema + extensão PostgreSQL
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo_pgsql \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copia os arquivos
+# Copia o código
 COPY . /app
 WORKDIR /app
 
