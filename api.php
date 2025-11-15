@@ -16,12 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'users') {
     try {
-        // FORÇA IPv4 (evita erro de IPv6 no Render)
-        $ipv4 = '34.201.16.99'; // IP público do seu Supabase (fixo por região)
-        $dsn = "pgsql:hostaddr=$ipv4;port=5432;dbname={$_ENV['DB_NAME']};sslmode=require";
-        
-        $pdo = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASS'], [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        // CONNECTION STRING COMPLETA DO SUPABASE (funciona no Render)
+        $supabase_url = "pgsql:host=db.saqmuguywftejzehdcwx.supabase.co;port=5432;dbname=postgres;sslmode=require";
+        $supabase_user = $_ENV['DB_USER'];      // postgres
+        $supabase_pass = $_ENV['DB_PASS'];      // sua senha
+
+        $pdo = new PDO($supabase_url, $supabase_user, $supabase_pass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_TIMEOUT => 10  // timeout de 10 segundos
         ]);
 
         $stmt = $pdo->query('SELECT * FROM users LIMIT 10');
