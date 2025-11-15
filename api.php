@@ -7,7 +7,7 @@ if (in_array($origin, $allowed)) {
     header("Access-Control-Allow-Origin: $origin");
 }
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, apikey, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -15,24 +15,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'users') {
-    try {
-        // CONNECTION STRING COMPLETA DO SUPABASE (funciona no Render)
-        $supabase_url = "pgsql:host=db.saqmuguywftejzehdcwx.supabase.co;port=5432;dbname=postgres;sslmode=require";
-        $supabase_user = $_ENV['DB_USER'];      // postgres
-        $supabase_pass = $_ENV['DB_PASS'];      // sua senha
+    $supabase_url = 'https://saqmuguywftejzehdcwx.supabase.co/rest/v1/users';
+    $apikey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhcW11Z3V5d2Z0ZWp6ZWhkY3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MjUxNzUsImV4cCI6MjA3ODAwMTE3NX0.V6ZEn47kDYf_o5OwhmFMMjN9ZEqhBnVAVhbpwieKexU'; // ← COLE AQUI O ANON KEY
 
-        $pdo = new PDO($supabase_url, $supabase_user, $supabase_pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_TIMEOUT => 10  // timeout de 10 segundos
-        ]);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $supabase_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "apikey: $apikey",
+        "Authorization: Bearer $apikey"
+    ]);
 
-        $stmt = $pdo->query('SELECT * FROM users LIMIT 10');
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-        echo json_encode(['success' => true, 'data' => $data]);
-    } catch (Exception $e) {
+    if ($httpcode === 200) {
+        echo $response; // já é JSON
+    } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Supabase error', 'code' => $httpcode]);
     }
 } else {
     http_response_code(404);
