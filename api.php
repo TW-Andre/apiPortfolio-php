@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$allowed = ['https://andresantosdev.vercel.app', 'http://localhost:4000'];
+$allowed = ['https://andresantosdev.vercel.app', 'http://localhost:4000', 'http://127.0.0.1:4000'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowed)) {
     header("Access-Control-Allow-Origin: $origin");
@@ -16,14 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'users') {
     try {
-        $host = $_ENV['DB_HOST'];
-        $port = $_ENV['DB_PORT'] ?? '5432';
-        $dbname = $_ENV['DB_NAME'];
-        $user = $_ENV['DB_USER'];
-        $pass = $_ENV['DB_PASS'];
-
-        $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
-        $pdo = new PDO($dsn, $user, $pass, [
+        // FORÇA IPv4 (evita erro de IPv6 no Render)
+        $ipv4 = '34.201.16.99'; // IP público do seu Supabase (fixo por região)
+        $dsn = "pgsql:hostaddr=$ipv4;port=5432;dbname={$_ENV['DB_NAME']};sslmode=require";
+        
+        $pdo = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASS'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]);
 
