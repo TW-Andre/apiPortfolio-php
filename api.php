@@ -10,7 +10,7 @@ if (in_array($origin, $allowed)) {
     header("Access-Control-Allow-Origin: $origin"); // liberação dinâmica local
 }
 
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, apikey, Authorization');
 header('Access-Control-Allow-Credentials: true');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -41,8 +41,7 @@ switch ($action) {
             echo json_encode(['error' => 'Método não permitido']);
             exit();
         }
-        /* $input = file_get_contents('php://input');
-        $data = json_decode($input, true); */
+        
         $data = json_decode(file_get_contents('php://input'), true);
 
         if(json_last_error() !== JSON_ERROR_NONE) {
@@ -66,6 +65,39 @@ switch ($action) {
             "Prefer: return=representation"
         ]);
         
+        break;
+
+    case "update_user":
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(400);
+            echo json_encode(['error:' => 'ID ou método inválido']);
+            exit();
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        curl_setopt($ch, CURLOPT_URL, "$SUPABASE_URL/users?id=eq.$id");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "apikey: $APIKEY",
+            "Authorization: Bearer $APIKEY",
+            "Content-Type: application/json",
+            "Prefer: return=representation"
+        ]);
+        break;
+    
+    case "delete_user":
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+            http_response_code(400);
+            echo json_encode(['error:' => 'ID ou método inválido']);
+            exit();
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        curl_setopt($ch, CURLOPT_URL, "$SUPABASE_URL/users?id=eq.$id");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "apikey: $APIKEY",
+            "Authorization: Bearer $APIKEY",
+        ]);
         break;
     
         default:
