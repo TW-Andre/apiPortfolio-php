@@ -1,6 +1,11 @@
 <?php
 header('Content-Type: application/json');
 
+require __DIR__ . '/vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = ['https://andresantosdev.vercel.app', 'http://localhost:4000', 'http://127.0.0.1:4000', 'http://localhost', 'http://127.0.0.1'];
 
@@ -18,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$SUPABASE_URL = 'https://saqmuguywftejzehdcwx.supabase.co/rest/v1';
-$APIKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhcW11Z3V5d2Z0ZWp6ZWhkY3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MjUxNzUsImV4cCI6MjA3ODAwMTE3NX0.V6ZEn47kDYf_o5OwhmFMMjN9ZEqhBnVAVhbpwieKexU'; // ← COLE AQUI O ANON KEY
+$SUPABASE_URL = $_ENV['SUPABASE_HOST'] . '/rest/v1';
+$APIKEY = $_ENV['API_KEY'];
 
 $action = $_GET['action'] ?? '';
 $id = $_GET['id'] ?? null;
