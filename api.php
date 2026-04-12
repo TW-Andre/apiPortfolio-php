@@ -7,20 +7,35 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowed = ['https://andresantosdev.vercel.app', 'http://localhost:4000', 'http://127.0.0.1:4000', 'http://localhost', 'http://127.0.0.1'];
 
-if (in_array($origin, $allowed)) {
+$allowedOrigins = [
+    'https://andresantosdev.vercel.app',
+    // ← Adicione aqui seu domínio customizado se tiver (ex: https://andresantosdev.com)
+    'https://www.andresantosdev.com',   // exemplo
+    'http://localhost:4000',
+    'http://127.0.0.1:4000',
+    'http://localhost',
+    'http://127.0.0.1'
+];
+
+// Liberação exata + fallback para localhost
+if (in_array($origin, $allowedOrigins) || 
+    strpos($origin, 'localhost') !== false || 
+    strpos($origin, '127.0.0.1') !== false) {
+    
     header("Access-Control-Allow-Origin: $origin");
-} else if (strpos($origin, 'localhost') !== false || strpos($origin, '127.0.0.1') !== false) {
-    header("Access-Control-Allow-Origin: $origin"); // liberação dinâmica local
-}
+    header('Access-Control-Allow-Credentials: true');
+} 
+// else { não envia nada → bloqueia intencionalmente }
 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, apikey, Authorization');
-header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Headers: Content-Type, apikey, Authorization, X-Requested-With');
+header('Access-Control-Max-Age: 86400'); // cache do preflight por 24h
+
+// Preflight OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();
+    exit;
 }
 
 $SUPABASE_URL = $_ENV['SUPABASE_HOST'] . '/rest/v1';
