@@ -38,5 +38,8 @@ COPY . .
 # Expõe a porta que o Render vai usar
 EXPOSE $PORT
 
+# GNEWS_API_KEY é necessário para a aplicação, então definimos como variável de ambiente
+ENV GNEWS_API_KEY=${GNEWS_API_KEY}
+
 # Inicia o servidor PHP embutido (php -S) na porta definida pelo Render
 CMD ["sh", "-c", "php -S 0.0.0.0:${PORT} -t ."]
