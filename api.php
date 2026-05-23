@@ -10,8 +10,8 @@ $dotenv->safeLoad();   // Use safeLoad() para evitar erros se .env não existir
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 $allowedOrigins = [
-    'https://andresantosdev.vercel.app',
-    'https://www.andresantosdev.com',
+    'https://andrepradodev.vercel.app',
+    'https://www.andrepradodev.com',
     'http://localhost:4000',
     'http://127.0.0.1:4000',
     'http://localhost',
