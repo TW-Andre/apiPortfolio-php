@@ -1,6 +1,7 @@
 <?php
 // news.php  (na raiz do projeto)
-
+header('Access-Control-Allow-Methods: GET');
+header('Access-Control-Allow-Headers: Content-Type');
 require_once __DIR__ . '/vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -12,6 +13,8 @@ header('Content-Type: application/json');
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
     'https://andresantosdev.vercel.app',
+    'https://www.andreprado.me',
+    'https://andreprado.me',
     'http://localhost:4000',
     'http://127.0.0.1:4000',
     'http://localhost',
@@ -21,9 +24,6 @@ $allowedOrigins = [
 if (in_array($origin, $allowedOrigins) || strpos($origin, 'localhost') !== false || strpos($origin, 'vercel.app') !== false) {
     header("Access-Control-Allow-Origin: $origin");
 }
-
-header('Access-Control-Allow-Methods: GET');
-header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
