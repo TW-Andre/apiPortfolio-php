@@ -14,7 +14,8 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 $allowedOrigins = [
     'https://andrepradodev.vercel.app',
-    'https://www.andrepradodev.com',
+    'https://www.andreprado.me',
+    'https://andreprado.me',
     'http://localhost:4000',
     'http://127.0.0.1:4000',
     'http://localhost',
