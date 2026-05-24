@@ -1,6 +1,9 @@
 <?php
 // ====================== CORS - NO TOPO ABSOLUTO ======================
 // Nada de echo, espaço em branco ou código antes disso!
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, apikey, Authorization, X-Requested-With, Accept');
+header('Access-Control-Max-Age: 86400');
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -27,10 +30,6 @@ if (in_array($origin, $allowedOrigins) ||
     header('Access-Control-Allow-Credentials: true');
 }
 
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, apikey, Authorization, X-Requested-With, Accept');
-header('Access-Control-Max-Age: 86400');
-
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit(0);
@@ -41,9 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 header('Content-Type: application/json');
 
 $SUPABASE_URL = ($_ENV['SUPABASE_HOST'] ?? '') . '/rest/v1';
-$SUPABASE_KEY = $_ENV['API_KEY'] ?? '';   // renomeei para ficar mais claro
+$SUPABASE_KEY = $_ENV['API_KEY'] ?? '';
 
 $action = $_GET['action'] ?? '';
+$id = $_GET['id'] ?? null;
 
 $ch = curl_init();
 
@@ -58,7 +58,6 @@ switch ($action) {
         break;
 
     case 'create_user':
-        // ... (seu código de create_user permanece igual)
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
             echo json_encode(['error' => 'Método não permitido']);
@@ -91,13 +90,45 @@ switch ($action) {
         break;
 
     case 'update_user':
-        // ... (seu código de update_user - igual)
-        // ...
+        if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Método não permitido']);
+            exit();
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            http_response_code(400);
+            echo json_encode(['error' => 'JSON inválido']);
+            exit();
+        }
+        if (empty($id)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID é obrigatório para atualização']);
+            exit();
+        }
+        curl_setopt($ch, CURLOPT_URL, "$SUPABASE_URL/users?id=eq.$id");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "apikey: $SUPABASE_KEY",
+            "Authorization: Bearer $SUPABASE_KEY",
+            "Content-Type: application/json"
+        ]);
         break;
 
     case 'delete_user':
-        // ... (seu código de delete_user - igual)
-        // ...
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+            http_response_code(400);
+            echo json_encode(['error:' => 'ID ou método inválido']);
+            exit();
+        }
+        $data = json_decode(file_get_contents('php://input'), true);
+        curl_setopt($ch, CURLOPT_URL, "$SUPABASE_URL/users?id=eq.$id");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "apikey: $SUPABASE_KEY",
+            "Authorization: Bearer $SUPABASE_KEY",
+        ]);
         break;
 
     default:
