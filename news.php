@@ -1,5 +1,4 @@
 <?php
-// news.php  (na raiz do projeto)
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 require_once __DIR__ . '/vendor/autoload.php';
@@ -9,7 +8,6 @@ $dotenv->safeLoad();
 
 header('Content-Type: application/json');
 
-// CORS
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
     'https://andresantosdev.vercel.app',
